@@ -1,0 +1,351 @@
+HANOI     SUBENTRY BASES=(3)
+          WTO   'BIENVENIDO AL JUEGO TORRES DE HANOI (03-10 DISCOS)'
+INGRESO   WTOR  'CANTIDAD DE TORRES: (* SALIR)',DISCOS,,WAITECB
+          WAIT  ECB=WAITECB
+          CLI   DISCOS,C'*'
+          BE    FINJUEGO
+          BAL   10,VALID
+          CLI   ESVALI,C'S'
+          BNE   INGRESO  
+********************************************************************          
+*       			  	INICIALIZACION  				           *
+********************************************************************          
+          PACK  NRODISCOS,DISCOS
+          MVI   BAND,C'F'
+          ZAP   TOPE,=P'0'  
+********************************************************************          
+*       			    PANTALLA INICIAL 				           *
+********************************************************************
+          LA    12,DIAME                    
+          ZAP   DOBLE,NRODISCOS
+          ZAP   CONTO,NRODISCOS
+          CVB   11,DOBLE          
+          S     11,=F'1'
+          M     10,=F'19'
+          AR    11,12               
+          LA    12,DTORRE1          
+          CVB   10,DOBLE    * CANTIDAD DE VECES DE COPIA                
+COPIAR    MVC   0(19,12),0(11)
+          S     11,=F'19'
+          A     12,=F'19'       
+          BCT   10,COPIAR                          
+          BAL   10,IMPRIMIR
+********************************************************************          
+*       			     	PRINCIPAL  				               *
+********************************************************************
+COMP1     CLI   BAND,C'F'
+          BNE   FINJUEGO
+          
+COMP2     CP    NRODISCOS,=P'1'
+          BE    FINCOMP2
+          BL    FINCOMP2
+          
+          AP    TOPE,=P'1'
+          
+          LA    9,0
+          ZAP   DOBLE,TOPE
+          CVB   9,DOBLE          
+          M     8,=F'2'
+          LA    4,PILAN
+          AR    9,4
+          ZAP   0(2,9),NRODISCOS
+
+          LA    9,0
+          ZAP   DOBLE,TOPE
+          CVB   9,DOBLE 
+          LA    4,TORIGEN
+          AR    9,4
+          MVC   0(1,9),ORIGEN
+          
+          LA    9,0
+          ZAP   DOBLE,TOPE
+          CVB   9,DOBLE 
+          LA    4,TDESTINO
+          AR    9,4
+          MVC   0(1,9),DESTINO
+          
+          LA    9,0
+          ZAP   DOBLE,TOPE
+          CVB   9,DOBLE 
+          LA    4,TAUXILIAR
+          AR    9,4
+          MVC   0(1,9),AUXILIAR
+
+          SP    NRODISCOS,=P'1'
+          
+          MVC   VARAUX,DESTINO
+          MVC   DESTINO,AUXILIAR
+          MVC   AUXILIAR,VARAUX
+          
+          B     COMP2
+          
+FINCOMP2  MVC   MENSAJE+16(1),ORIGEN
+          MVC   MENSAJE+28(1),DESTINO
+*          WTO   MF=(E,WTOBLOCK)
+
+          BAL   10,MOVER                 
+          BAL   10,IMPRIMIR
+
+          MVI   BAND,C'T'
+                  
+          CP    TOPE,=P'0'
+          BE    COMP1
+          BL    COMP1          
+          
+          LA    9,0
+          ZAP   DOBLE,TOPE
+          CVB   9,DOBLE
+          M     8,=F'2'
+          LA    4,PILAN
+          AR    9,4
+          ZAP   NRODISCOS,0(2,9)
+
+          LA    9,0
+          ZAP   DOBLE,TOPE
+          CVB   9,DOBLE 
+          LA    4,TORIGEN
+          AR    9,4
+          MVC   ORIGEN(1),0(9)
+          
+          LA    9,0
+          ZAP   DOBLE,TOPE
+          CVB   9,DOBLE
+          LA    4,TDESTINO
+          AR    9,4
+          MVC   DESTINO(1),0(9)
+          
+          LA    9,0
+          ZAP   DOBLE,TOPE
+          CVB   9,DOBLE 
+          LA    4,TAUXILIAR
+          AR    9,4
+          MVC   AUXILIAR(1),0(9)
+          
+          SP    TOPE,=P'1'
+          
+          MVC   MENSAJE+16(1),ORIGEN
+          MVC   MENSAJE+28(1),DESTINO
+*          WTO   MF=(E,WTOBLOCK)
+          
+          BAL   10,MOVER          
+          BAL   10,IMPRIMIR
+          
+          SP    NRODISCOS,=P'1'
+          
+          MVC   VARAUX,ORIGEN
+          MVC   ORIGEN,AUXILIAR
+          MVC   AUXILIAR,VARAUX
+          
+          MVI   BAND,C'F'
+          
+          B     COMP1
+          
+FINJUEGO  WTO   'LISTO.' 
+
+          SUBEXIT
+********************************************************************          
+*       		     RUTINA DE VALIDACION	 			           *
+********************************************************************           
+VALID     LA    4,VECT
+          LA    5,8
+OTRONUM   CLC   0(2,4),DISCOS
+          BE    VALIDO         
+          LA    4,2(4)
+          BCT   5,OTRONUM
+          MVI   ESVALI,C'N'
+          B     FINVALID
+VALIDO    MVI   ESVALI,C'S'
+FINVALID  BR    10   
+********************************************************************          
+*   		     RUTINA PARA MOSTRAR POR PANTALLA	 		       *
+********************************************************************
+IMPRIMIR  LA    5,0
+          A     5,=F'171'          
+          LA    6,10 *IMPRIMO 10 LINEAS POR PANTALLA
+LINEAS    LA    7,DTORRE1
+          AR    7,5
+          MVC   LINEA(19),0(7)
+          MVI   LINEA+19,C' '
+          LA    7,DTORRE2
+          AR    7,5
+          MVC   LINEA+20(19),0(7)
+          MVI   LINEA+39,C' '
+          LA    7,DTORRE3
+          AR    7,5
+          MVC   LINEA+40(19),0(7)
+          
+          WTO   MF=(E,WTOBLOCK2)
+          S     5,=F'19'
+          BCT   6,LINEAS 
+          
+          MVC   LINEA(20),=C'      TORRE 1       '
+          MVC   LINEA+20(20),=C'      TORRE 2       '
+          MVC   LINEA+40(19),=C'      TORRE 3      '
+          WTO   MF=(E,WTOBLOCK2)         
+          BR    10
+********************************************************************          
+*		  		   RUTINA PARA MOVER LOS DISCOS	 			       *
+********************************************************************
+MOVER     CLI   ORIGEN,C'O'
+          BE    DEORIG
+          CLI   ORIGEN,C'D'
+          BE    DEDEST
+          CLI   ORIGEN,C'A'
+          BE    DEAUX
+          
+DEORIG    SP    CONTO,=P'1'
+          ZAP   DOBLE,CONTO
+          CVB   7,DOBLE
+          M     6,=F'19'
+          LA    12,DTORRE1
+          AR    7,12		
+          MVC   AUXPANT(19),0(7)
+          LR    5,7
+          CLI   DESTINO,C'D'
+          BE    ORIGDEST
+          CLI   DESTINO,C'A'
+          BE    ORIGAUX      
+                                  
+ORIGDEST  ZAP   DOBLE,CONTD
+          CVB   7,DOBLE
+          M     6,=F'19'
+          LA    12,DTORRE3
+          AR    7,12
+          MVC   0(19,5),0(7)
+          MVC   0(19,7),AUXPANT
+          AP    CONTD,=P'1'
+          B     FINMOVER
+          
+ORIGAUX   ZAP   DOBLE,CONTA
+          CVB   7,DOBLE
+          M     6,=F'19'
+          LA    12,DTORRE2
+          AR    7,12	
+          MVC   0(19,5),0(7)
+          MVC   0(19,7),AUXPANT
+          AP    CONTA,=P'1'
+          B     FINMOVER    
+           
+DEDEST    SP    CONTD,=P'1'
+          ZAP   DOBLE,CONTD
+          CVB   7,DOBLE
+          M     6,=F'19'
+          LA    12,DTORRE3
+          AR    7,12		
+          MVC   AUXPANT(19),0(7)
+          LR    5,7
+          CLI   DESTINO,C'O'
+          BE    DESTORIG
+          B     DESTAUX
+          
+DESTORIG  ZAP   DOBLE,CONTO
+          CVB   7,DOBLE
+          M     6,=F'19'
+          LA    12,DTORRE1
+          AR    7,12		
+          MVC   0(19,5),0(7)
+          MVC   0(19,7),AUXPANT
+          AP    CONTO,=P'1'
+          B     FINMOVER
+    
+DESTAUX   ZAP   DOBLE,CONTA
+          CVB   7,DOBLE
+          M     6,=F'19'
+          LA    12,DTORRE2
+          AR    7,12	
+          MVC   0(19,5),0(7)
+          MVC   0(19,7),AUXPANT
+          AP    CONTA,=P'1'
+          B     FINMOVER    
+             
+DEAUX     SP    CONTA,=P'1'
+          ZAP   DOBLE,CONTA
+          CVB   7,DOBLE
+          M     6,=F'19'
+          LA    12,DTORRE2
+          AR    7,12		
+          MVC   AUXPANT(19),0(7)
+          LR    5,7
+          CLI   DESTINO,C'O'
+          BE    AUXORIG
+          B     AUXDEST
+          
+AUXORIG   ZAP   DOBLE,CONTO
+          CVB   7,DOBLE
+          M     6,=F'19'
+          LA    12,DTORRE1
+          AR    7,12		
+          MVC   0(19,5),0(7)
+          MVC   0(19,7),AUXPANT
+          AP    CONTO,=P'1'
+          B     FINMOVER
+                    
+AUXDEST   ZAP   DOBLE,CONTD
+          CVB   7,DOBLE
+          M     6,=F'19'
+          LA    12,DTORRE3
+          AR    7,12	
+          MVC   0(19,5),0(7)
+          MVC   0(19,7),AUXPANT
+          AP    CONTD,=P'1'
+          B     FINMOVER
+         
+FINMOVER  BR    10         
+********************************************************************          
+*       			          VARIABLES	 				           *
+********************************************************************        
+WAITECB   DC    F'0'  
+
+DISCOS    DS    CL2
+VECT      DC    C'0304050607080910'        
+ESVALI    DS    CL1
+
+NRODISCOS DC    PL2'0'
+TOPE      DC    PL2'0'
+BAND      DS    CL1    
+
+DOBLE     DS    D
+          
+TORIGEN   DC    10CL1' '
+TDESTINO  DC    10CL1' '
+TAUXILIAR DC    10CL1' '
+PILAN     DC    10PL2'0'
+
+ORIGEN    DC    CL1'O'
+DESTINO   DC    CL1'D'
+AUXILIAR  DC    CL1'A'
+
+VARAUX    DS    CL1 
+
+WTOBLOCK  DC    H'34'
+          DC    H'0'
+MENSAJE   DC    C'MOVER DE TORRE " " A TORRE " "'
+
+* PARA MOSTRAR POR PANTALLA          
+DIAME     DS    0CL190
+LONG1     DC    CL19'         *         '  
+LONG2     DC    CL19'        ***        ' 
+LONG3     DC    CL19'       *****       ' 
+LONG4     DC    CL19'      *******      ' 
+LONG5     DC    CL19'     *********     ' 
+LONG6     DC    CL19'    ***********    ' 
+LONG7     DC    CL19'   *************   ' 
+LONG8     DC    CL19'  ***************  ' 
+LONG9     DC    CL19' ***************** ' 
+LONG10    DC    CL19'*******************'   
+
+DTORRE1   DC    10CL19'                  ' 
+DTORRE2   DC    10CL19'                  ' 
+DTORRE3   DC    10CL19'                  ' 
+
+WTOBLOCK2 DC    H'63'
+          DC    H'0'
+LINEA     DS    CL59      
+
+CONTO     DC    PL2'0'
+CONTA     DC    PL2'0'
+CONTD     DC    PL2'0'
+
+AUXPANT   DS    CL19
+
+          END      
